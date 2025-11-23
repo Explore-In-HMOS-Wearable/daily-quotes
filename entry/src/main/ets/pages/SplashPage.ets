@@ -1,36 +1,36 @@
-import { router } from '@kit.ArkUI';
-
-
 @Entry
 @Component
 struct Index {
 
   @State iconAnimation: string = '35%';
+  pageStack : NavPathStack = new NavPathStack();
 
   build() {
-    Column() {
-      Image($r('app.media.ic_splash'))
-        .width(this.iconAnimation)
-        .aspectRatio(1)
-        .objectFit(ImageFit.Contain)
-        .onAppear( () => {
-          animateToImmediately({
+    Navigation(this.pageStack) {
+      Column() {
+        Image($r('app.media.ic_splash'))
+          .height('100%')
+          .width(this.iconAnimation)
+          .aspectRatio(1)
+          .objectFit(ImageFit.Contain)
+          .onAppear(() => {
+            animateToImmediately({
               duration: 2000,
               curve: Curve.ExtremeDeceleration,
               onFinish: () => {
-                router.replaceUrl({
-                  url: 'pages/QuotePage'
-                })
+                this.pageStack.pushPathByName('QuotePage', null);
               }
-          }, () => {
-            this.iconAnimation = '70%'
+            }, () => {
+              this.iconAnimation = '70%'
+            })
           })
-        })
+      }
+      .height('100%')
+      .width('100%')
+      .alignItems(HorizontalAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor('#fffffbe0')
     }
-    .height('100%')
-    .width('100%')
-    .alignItems(HorizontalAlign.Center)
-    .justifyContent(FlexAlign.Center)
-    .backgroundColor('#fffffbe0')
+    .hideTitleBar(true)
   }
 }

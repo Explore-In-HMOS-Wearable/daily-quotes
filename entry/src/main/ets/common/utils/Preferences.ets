@@ -1,7 +1,9 @@
 import preferences from '@ohos.data.preferences';
+import { Context } from '@kit.AbilityKit';
 
 const PREFERENCES_NAME = 'favourites.db';
 let favouritesPreferences: preferences.Preferences | null = null;
+let context: Context = AppStorage.get('context') as Context;
 
 @Observed
 export default class Preferences {
@@ -18,7 +20,6 @@ export default class Preferences {
   }
 
   async getPreferencesFromStorage() {
-    const context = getContext(this) as Context;
     favouritesPreferences = await preferences.getPreferences(context, PREFERENCES_NAME);
   }
 
