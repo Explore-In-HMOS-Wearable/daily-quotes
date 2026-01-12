@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.hmosdemos.daily_quote",
+    "bundleName": "com.hmosdemos.wearable.daily_quote",
     "vendor": "hmosdemos",
     "versionCode": 1000000,
     "versionName": "1.0.0",

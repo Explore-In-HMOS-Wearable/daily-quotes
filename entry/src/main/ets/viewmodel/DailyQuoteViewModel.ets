@@ -5,21 +5,21 @@ export class DailyQuoteViewModel {
   static instance = new DailyQuoteViewModel();
 
   getQuoteList(): Array<DailyQuoteModel> {
-    return DailyQuoteData;
+    return DAILY_QUOTE_DATA;
   }
 
   getDailyQuote(): Array<DailyQuoteModel> {
     let today = new Date();
     let dayIndex = today.getDay();
-    return [DailyQuoteData[dayIndex]]
+    return [DAILY_QUOTE_DATA[dayIndex]]
   }
 
   getFavouriteQuotes(favouriteQuoteIDs: Array<number>): Array<DailyQuoteModel> {
-    return DailyQuoteData.filter((quote) => favouriteQuoteIDs.indexOf(quote.id) !== -1);
+    return DAILY_QUOTE_DATA.filter((quote) => favouriteQuoteIDs.indexOf(quote.id) !== -1);
   }
 }
 
-const DailyQuoteData: Array<DailyQuoteModel> = [
+const DAILY_QUOTE_DATA: Array<DailyQuoteModel> = [
   new DailyQuoteModel(
     1,
     `If you can dream it, you can do it`,
