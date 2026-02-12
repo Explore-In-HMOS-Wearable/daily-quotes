@@ -9,9 +9,9 @@ favorite/unfavorite features.
 # Preview
 
 <div>
-  <img src="screenshots/Gif-1.gif" width="25%" />
-  <img src="screenshots/Screenshot-1.png" width="25%" />
-  <img src="screenshots/Screenshot-2.png" width="25%" />
+  <img src="Screenshots/Gif-1.gif" width="25%" />
+  <img src="Screenshots/Screenshot-1.png" width="25%" />
+  <img src="Screenshots/Screenshot-2.png" width="25%" />
 </div>
 
 # Use Cases
