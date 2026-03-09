@@ -11,10 +11,25 @@ export function QuotePageBuilder() {
 @Component
 struct QuotePage {
   @State favouriteQuotesIDs: number[] = [];
+  @State quoteList: DailyQuoteModel[] = [];
   pageInfos: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
     this.getOrUpdatePreferences();
+    this.quoteList = this.shuffleArray([...DailyQuoteViewModel.instance.getQuoteList()]);
+  }
+
+  shuffleArray(array: DailyQuoteModel[]): DailyQuoteModel[] {
+    let currentIndex: number = array.length;
+    let randomIndex: number = 0;
+    while (currentIndex != 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      let temp: DailyQuoteModel = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temp;
+    }
+    return array;
   }
 
   aboutToDisappear(): void {
@@ -58,7 +73,7 @@ struct QuotePage {
 
         Blank().height('3%')
         Swiper() {
-          ForEach(DailyQuoteViewModel.instance.getQuoteList(), (item: DailyQuoteModel) => {
+          ForEach(this.quoteList, (item: DailyQuoteModel) => {
             Column() {
               Blank()
               Text(item.bodyText)

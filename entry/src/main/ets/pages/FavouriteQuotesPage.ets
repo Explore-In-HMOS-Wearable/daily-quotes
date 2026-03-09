@@ -44,6 +44,18 @@ struct FavouriteQuotesPage {
         .backgroundColor('#ff47392b')
 
         Blank().height('3%')
+        if (this.favouriteQuotes.length === 0) {
+          Column() {
+            Text('No favourites yet')
+              .fontColor('#ff47392b')
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+          }
+          .height('50%')
+          .width('100%')
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+        } else {
         Swiper() {
           ForEach(this.favouriteQuotes, (item: DailyQuoteModel) => {
             Column() {
@@ -94,6 +106,7 @@ struct FavouriteQuotesPage {
         .height('50%')
         .width('100%')
         .indicator(false)
+        }
 
         Blank().height('1%')
         Button() {
