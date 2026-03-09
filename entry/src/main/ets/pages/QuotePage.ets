@@ -1,6 +1,7 @@
 import { DailyQuoteModel } from '../model/DailyQuoteModel';
 import { DailyQuoteViewModel } from '../viewmodel/DailyQuoteViewModel';
 import Preferences from '../common/utils/Preferences';
+import { pasteboard } from '@kit.BasicServicesKit';
 
 @Builder
 export function QuotePageBuilder() {
@@ -11,10 +12,25 @@ export function QuotePageBuilder() {
 @Component
 struct QuotePage {
   @State favouriteQuotesIDs: number[] = [];
+  @State quoteList: DailyQuoteModel[] = [];
   pageInfos: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
     this.getOrUpdatePreferences();
+    this.quoteList = this.shuffleArray([...DailyQuoteViewModel.instance.getQuoteList()]);
+  }
+
+  shuffleArray(array: DailyQuoteModel[]): DailyQuoteModel[] {
+    let currentIndex: number = array.length;
+    let randomIndex: number = 0;
+    while (currentIndex != 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      let temp: DailyQuoteModel = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temp;
+    }
+    return array;
   }
 
   aboutToDisappear(): void {
@@ -58,7 +74,7 @@ struct QuotePage {
 
         Blank().height('3%')
         Swiper() {
-          ForEach(DailyQuoteViewModel.instance.getQuoteList(), (item: DailyQuoteModel) => {
+          ForEach(this.quoteList, (item: DailyQuoteModel) => {
             Column() {
               Blank()
               Text(item.bodyText)
@@ -75,9 +91,8 @@ struct QuotePage {
               Row() {
                 Blank().width('3%')
                 Button() {
-                  Text(this.isFavouriteQuote(item.id) ? 'unfavourite' : 'favourite')
-                    .fontSize(11)
-                    .fontStyle(FontStyle.Italic)
+                  Text(this.isFavouriteQuote(item.id) ? '❤️' : '🤍')
+                    .fontSize(18)
                     .fontColor(Color.Black)
                 }
                 .type(ButtonType.Normal)
@@ -88,6 +103,24 @@ struct QuotePage {
                 .borderColor(Color.Black)
                 .onClick(() => {
                   this.changeQuoteFavourite(item.id);
+                })
+
+                Blank().width('3%')
+
+                Button() {
+                  Text('copy')
+                    .fontSize(14)
+                    .fontColor(Color.Black)
+                }
+                .type(ButtonType.Normal)
+                .backgroundColor('#ffcacaca')
+                .padding(2)
+                .borderRadius(2)
+                .borderWidth(1)
+                .borderColor(Color.Black)
+                .onClick(() => {
+                  const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, item.bodyText);
+                  pasteboard.getSystemPasteboard().setData(pasteData);
                 })
               }
               .width('100%')

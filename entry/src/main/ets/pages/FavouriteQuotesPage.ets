@@ -1,6 +1,7 @@
 import Preferences from '../common/utils/Preferences';
 import { DailyQuoteModel } from '../model/DailyQuoteModel';
 import { DailyQuoteViewModel } from '../viewmodel/DailyQuoteViewModel';
+import { pasteboard } from '@kit.BasicServicesKit';
 
 @Builder
 export function FavouriteQuotesPageBuilder() {
@@ -44,6 +45,18 @@ struct FavouriteQuotesPage {
         .backgroundColor('#ff47392b')
 
         Blank().height('3%')
+        if (this.favouriteQuotes.length === 0) {
+          Column() {
+            Text('No favourites yet')
+              .fontColor('#ff47392b')
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+          }
+          .height('50%')
+          .width('100%')
+          .alignItems(HorizontalAlign.Center)
+          .justifyContent(FlexAlign.Center)
+        } else {
         Swiper() {
           ForEach(this.favouriteQuotes, (item: DailyQuoteModel) => {
             Column() {
@@ -62,9 +75,8 @@ struct FavouriteQuotesPage {
               Row() {
                 Blank().width('3%')
                 Button() {
-                  Text('unfavourite')
-                    .fontSize(11)
-                    .fontStyle(FontStyle.Italic)
+                  Text('❤️')
+                    .fontSize(18)
                     .fontColor(Color.Black)
                 }
                 .type(ButtonType.Normal)
@@ -75,6 +87,24 @@ struct FavouriteQuotesPage {
                 .borderColor(Color.Black)
                 .onClick(() => {
                   this.removeFavouriteQuote(item.id);
+                })
+
+                Blank().width('3%')
+
+                Button() {
+                  Text('copy')
+                    .fontSize(14)
+                    .fontColor(Color.Black)
+                }
+                .type(ButtonType.Normal)
+                .backgroundColor('#ffcacaca')
+                .padding(2)
+                .borderRadius(2)
+                .borderWidth(1)
+                .borderColor(Color.Black)
+                .onClick(() => {
+                  const pasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, item.bodyText);
+                  pasteboard.getSystemPasteboard().setData(pasteData);
                 })
               }
               .width('100%')
@@ -94,6 +124,7 @@ struct FavouriteQuotesPage {
         .height('50%')
         .width('100%')
         .indicator(false)
+        }
 
         Blank().height('1%')
         Button() {

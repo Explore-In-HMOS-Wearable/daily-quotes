@@ -54,5 +54,45 @@ const DAILY_QUOTE_DATA: Array<DailyQuoteModel> = [
     7,
     `I have not failed. I've just found 10,000 ways that won't work`,
     `Thomas A. Edison`,
+  ),
+  new DailyQuoteModel(
+    8,
+    `It does not matter how slowly you go as long as you do not stop`,
+    `Confucius`,
+  ),
+  new DailyQuoteModel(
+    9,
+    `What you get by achieving your goals is not as important as what you become by achieving your goals`,
+    `Zig Ziglar`,
+  ),
+  new DailyQuoteModel(
+    10,
+    `Believe you can and you're halfway there`,
+    `Theodore Roosevelt`,
+  ),
+  new DailyQuoteModel(
+    11,
+    `You miss 100% of the shots you don't take`,
+    `Wayne Gretzky`,
+  ),
+  new DailyQuoteModel(
+    12,
+    `Fall seven times and stand up eight`,
+    `Japanese Proverb`,
+  ),
+  new DailyQuoteModel(
+    13,
+    `Success is not final, failure is not fatal: it is the courage to continue that counts`,
+    `Winston Churchill`,
+  ),
+  new DailyQuoteModel(
+    14,
+    `In the middle of every difficulty lies opportunity`,
+    `Albert Einstein`,
+  ),
+  new DailyQuoteModel(
+    15,
+    `It always seems impossible until it's done`,
+    `Nelson Mandela`,
   )
 ];
