@@ -9,6 +9,11 @@
       "name" : "FavouriteQuotesPage",
       "pageSourceFile"  : "src/main/ets/pages/FavouriteQuotesPage.ets",
       "buildFunction" : "FavouriteQuotesPageBuilder"
+    },
+    {
+      "name" : "SettingsPage",
+      "pageSourceFile"  : "src/main/ets/pages/SettingsPage.ets",
+      "buildFunction" : "SettingsPageBuilder"
     }
   ]
 }

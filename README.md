@@ -9,9 +9,10 @@ favorite/unfavorite features.
 # Preview
 
 <div>
-  <img src="Screenshots/Gif-1.gif" width="25%" />
-  <img src="Screenshots/Screenshot-1.png" width="25%" />
-  <img src="Screenshots/Screenshot-2.png" width="25%" />
+  <img src="screenshots/img.gif" width="24%" />
+  <img src="screenshots/img1.png" width="24%" />
+  <img src="screenshots/img2.png" width="24%" />
+  <img src="screenshots/img3.png" width="24%" />
 </div>
 
 # Use Cases
@@ -51,7 +52,7 @@ entry/src/main/ets/
 ├── pages/                            # UI pages (screens) for the watch app
 │   ├── SplashPage                    # Initial splash screen shown at startup
 │   ├── FavouriteQuotesPage           # Page to view and manage favourite quotes
-│   └── RandomQuotePage               # Page that shows a random daily quote
+│   └── SettingsPage                  # Page to change font size and theme
 │
 ├── viewmodels/                       # State management layer (MVVM pattern)
 │   └── DailyQuoteViewModel           # Handles logic for fetching quotes, favourite/unfavourite actions
