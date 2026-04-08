@@ -1,4 +1,4 @@
-import Preferences from '../common/utils/Preferences';
+import { PreferencesModule as Preferences } from '../common/utils/Preferences';
 import { DailyQuoteModel } from '../model/DailyQuoteModel';
 import { DailyQuoteViewModel } from '../viewmodel/DailyQuoteViewModel';
 
@@ -10,24 +10,50 @@ export function FavouriteQuotesPageBuilder() {
 @Entry
 @Component
 struct FavouriteQuotesPage {
-  favouriteQuotesIDs: number[] = [];
+  @StorageLink('favouriteQuotesIDs') @Watch('getFavourites') favouriteQuotesIDs: number[] = [];
   @State favouriteQuotes: Array<DailyQuoteModel> = [];
+  @StorageLink('isDarkMode') @Watch('onSettingsChange') isDarkMode: boolean = false;
+  @State bgColor: string = '#fffffbe0';
+  @State cardBgColor: string = '#ffefc1a1';
+  @State textColour: string = '#ff47392b';
+  @State buttonBgColor: string = '#ffcacaca';
   pageInfos: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
     this.getFavourites();
+    this.onSettingsChange();
+  }
+
+  onPageShow(): void {
+    this.getFavourites();
+    this.onSettingsChange();
+  }
+
+  onSettingsChange() {
+    this.applyThemeColors();
+  }
+
+  applyThemeColors() {
+    if (this.isDarkMode) {
+      this.bgColor = '#ff1a1a1a';
+      this.cardBgColor = '#ff2d2d2d';
+      this.textColour = '#ffffffff';
+      this.buttonBgColor = '#ff3d3d3d';
+    } else {
+      this.bgColor = '#fffffbe0';
+      this.cardBgColor = '#ffefc1a1';
+      this.textColour = '#ff47392b';
+      this.buttonBgColor = '#ffcacaca';
+    }
   }
 
   getFavourites() {
-    this.favouriteQuotesIDs = Preferences.instance.getPreference();
     this.favouriteQuotes = DailyQuoteViewModel.instance.getFavouriteQuotes(this.favouriteQuotesIDs);
   }
 
-  removeFavouriteQuote(quoteID: number) {
-    const index = this.favouriteQuotesIDs.indexOf(quoteID);
-    this.favouriteQuotesIDs.splice(index, 1);
-    this.favouriteQuotes.splice(index, 1);
-    Preferences.instance.putPreference(this.favouriteQuotesIDs);
+  async removeFavouriteQuote(quoteID: number): Promise<void> {
+    this.favouriteQuotesIDs = this.favouriteQuotesIDs.filter(id => id !== quoteID);
+    await Preferences.instance.putPreference(this.favouriteQuotesIDs);
   }
 
   build() {
@@ -35,7 +61,7 @@ struct FavouriteQuotesPage {
       Column() {
         Button() {
           Text(`Favourites`)
-            .fontColor('#fff')
+            .fontColor(Color.White)
             .fontWeight(900)
             .margin(5)
         }
@@ -49,14 +75,14 @@ struct FavouriteQuotesPage {
             Column() {
               Blank()
               Text(item.bodyText)
-                .fontColor('#ff47392b')
+                .fontColor(this.textColour)
                 .fontStyle(FontStyle.Italic)
                 .textAlign(TextAlign.Start)
               Text(`- ${item.author}`)
                 .fontColor(Color.Blue)
                 .textAlign(TextAlign.End)
                 .alignSelf(ItemAlign.End)
-                .fontColor('#ff47392b')
+                .fontColor(this.textColour)
                 .fontWeight(900)
               Blank().height('5%')
               Row() {
@@ -65,14 +91,14 @@ struct FavouriteQuotesPage {
                   Text('unfavourite')
                     .fontSize(11)
                     .fontStyle(FontStyle.Italic)
-                    .fontColor(Color.Black)
+                    .fontColor(this.textColour)
                 }
                 .type(ButtonType.Normal)
-                .backgroundColor('#ffcacaca')
+                .backgroundColor(this.buttonBgColor)
                 .padding(2)
                 .borderRadius(2)
                 .borderWidth(1)
-                .borderColor(Color.Black)
+                .borderColor(this.textColour)
                 .onClick(() => {
                   this.removeFavouriteQuote(item.id);
                 })
@@ -81,14 +107,14 @@ struct FavouriteQuotesPage {
             }
             .alignItems(HorizontalAlign.Center)
             .justifyContent(FlexAlign.Center)
-            .backgroundColor('#ffefc1a1')
+            .backgroundColor(this.cardBgColor)
             .borderRadius(20)
             .padding(5)
             .margin({
               left: '10%',
               right: '10%'
             })
-          }, (item: DailyQuoteModel) => `${item.id}_${item.isFavourite}`)
+          }, (item: DailyQuoteModel) => `${item.id}_true`)
         }
         .loop(false)
         .height('50%')
@@ -100,10 +126,10 @@ struct FavouriteQuotesPage {
           Text('see quotes')
             .fontSize(11)
             .fontStyle(FontStyle.Italic)
-            .fontColor('#ff47392b')
+            .fontColor(this.textColour)
             .decoration({
               type: TextDecorationType.Underline,
-              color: '#ff47392b',
+              color: this.textColour,
               style: TextDecorationStyle.SOLID
             })
         }
@@ -115,7 +141,7 @@ struct FavouriteQuotesPage {
       }
       .height('100%')
       .width('100%')
-      .backgroundColor('#fffffbe0')
+      .backgroundColor(this.bgColor)
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
     }

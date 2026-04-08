@@ -1,6 +1,8 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { PreferencesModule as Preferences } from '../common/utils/Preferences';
+import { initializePreferences } from '../viewmodel/DailyQuoteViewModel';
 
 const DOMAIN = 0x0000;
 
@@ -23,9 +25,20 @@ export default class EntryAbility extends UIAbility {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
       }
-      let context: Context | undefined = windowStage.getMainWindowSync().getUIContext().getHostContext();
-      if (context) {
-        AppStorage.setOrCreate('context', context);
+      const hostContext: Context | undefined = windowStage.getMainWindowSync().getUIContext().getHostContext();
+      if (hostContext) {
+        AppStorage.setOrCreate('context', hostContext);
+        AppStorage.setOrCreate('fontSizeSetting', 'medium');
+        AppStorage.setOrCreate('themeModeSetting', 'light');
+        AppStorage.setOrCreate('isDarkMode', false);
+        AppStorage.setOrCreate('favouriteQuotesIDs', []);
+        AppStorage.setOrCreate('selectedCategory', 'all');
+        
+        const prefs = Preferences.getInstance(hostContext);
+        const finalContext: Context = hostContext;
+        prefs.loadToAppStorage().then(() => {
+          initializePreferences(finalContext);
+        });
       }
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
     });
