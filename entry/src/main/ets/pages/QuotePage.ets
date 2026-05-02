@@ -1,6 +1,6 @@
-import { DailyQuoteModel } from '../model/DailyQuoteModel';
+import { DailyQuoteModel, QuoteCategory } from '../model/DailyQuoteModel';
 import { DailyQuoteViewModel } from '../viewmodel/DailyQuoteViewModel';
-import Preferences from '../common/utils/Preferences';
+import { PreferencesModule as Preferences } from '../common/utils/Preferences';
 
 @Builder
 export function QuotePageBuilder() {
@@ -10,11 +10,30 @@ export function QuotePageBuilder() {
 @Entry
 @Component
 struct QuotePage {
-  @State favouriteQuotesIDs: number[] = [];
+  @StorageLink('favouriteQuotesIDs') favouriteQuotesIDs: number[] = [];
+  @StorageLink('selectedCategory') selectedCategory: string = 'all';
+  @StorageLink('fontSizeSetting') @Watch('onSettingsChange') fontSizeSetting: string = 'medium';
+  @StorageLink('isDarkMode') @Watch('onSettingsChange') isDarkMode: boolean = false;
+  @State fontSize: number = 14;
+  @State bgColor: string = '#fffffbe0';
+  @State cardBgColor: string = '#ffefc1a1';
+  @State textColour: string = '#ff47392b';
+  @State buttonBgColor: string = '#ffcacaca';
+  @State filteredQuotes: DailyQuoteModel[] = [];
   pageInfos: NavPathStack = new NavPathStack();
 
+  private categories: string[] = [
+    'all',
+    QuoteCategory.MOTIVATION,
+    QuoteCategory.WISDOM,
+    QuoteCategory.LIFE,
+    QuoteCategory.SUCCESS,
+    QuoteCategory.COURAGE
+  ];
+
   aboutToAppear(): void {
-    this.getOrUpdatePreferences();
+    this.onSettingsChange();
+    this.updateFilteredQuotes();
   }
 
   aboutToDisappear(): void {
@@ -22,25 +41,60 @@ struct QuotePage {
   }
 
   onPageShow(): void {
-    this.getOrUpdatePreferences();
+    this.onSettingsChange();
+    this.updateFilteredQuotes();
   }
 
-  getOrUpdatePreferences() {
-    this.favouriteQuotesIDs = Preferences.instance.getPreference();
+  onSettingsChange() {
+    this.applyFontSize();
+    this.applyThemeColors();
+  }
+
+  applyFontSize() {
+    if (this.fontSizeSetting === 'small') {
+      this.fontSize = 12;
+    } else if (this.fontSizeSetting === 'large') {
+      this.fontSize = 18;
+    } else {
+      this.fontSize = 14;
+    }
+  }
+
+  applyThemeColors() {
+    if (this.isDarkMode) {
+      this.bgColor = '#ff1a1a1a';
+      this.cardBgColor = '#ff2d2d2d';
+      this.textColour = '#ffffffff';
+      this.buttonBgColor = '#ff3d3d3d';
+    } else {
+      this.bgColor = '#fffffbe0';
+      this.cardBgColor = '#ffefc1a1';
+      this.textColour = '#ff47392b';
+      this.buttonBgColor = '#ffcacaca';
+    }
   }
 
   isFavouriteQuote(quoteID: number): boolean {
     return this.favouriteQuotesIDs.includes(quoteID);
   }
 
-  changeQuoteFavourite(quoteID: number) {
+  async changeQuoteFavourite(quoteID: number): Promise<void> {
+    let newIDs: number[];
     if (this.isFavouriteQuote(quoteID)) {
-      const index = this.favouriteQuotesIDs.indexOf(quoteID);
-      this.favouriteQuotesIDs.splice(index, 1);
+      newIDs = this.favouriteQuotesIDs.filter(id => id !== quoteID);
     } else {
-      this.favouriteQuotesIDs.push(quoteID);
+      newIDs = [...this.favouriteQuotesIDs, quoteID];
     }
-    Preferences.instance.putPreference(this.favouriteQuotesIDs);
+    await Preferences.instance.putPreference(newIDs);
+  }
+
+  updateFilteredQuotes() {
+    const allQuotes = DailyQuoteViewModel.instance.getAllQuotes();
+    if (this.selectedCategory === 'all') {
+      this.filteredQuotes = allQuotes;
+    } else {
+      this.filteredQuotes = allQuotes.filter(q => q.category === this.selectedCategory);
+    }
   }
 
   build() {
@@ -48,7 +102,7 @@ struct QuotePage {
       Column() {
         Button() {
           Text(`Quotes`)
-            .fontColor('#fff')
+            .fontColor('#ffffffff')
             .fontWeight(900)
             .margin(5)
         }
@@ -56,21 +110,49 @@ struct QuotePage {
         .borderRadius(5)
         .backgroundColor('#ff47392b')
 
+        Blank().height('2%')
+
+        Scroll() {
+          Row() {
+            ForEach(this.categories, (cat: string) => {
+              Text(cat.charAt(0).toUpperCase() + cat.slice(1))
+                .fontSize(10)
+                .fontColor(this.selectedCategory === cat ? '#ffffffff' : this.textColour)
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+                .margin({ left: 4, right: 4 })
+                .borderRadius(5)
+                .backgroundColor(this.selectedCategory === cat ? '#ff47392b' : this.buttonBgColor)
+                .borderWidth(1)
+                .borderColor(this.textColour)
+                .onClick(async () => {
+                  await Preferences.instance.putSelectedCategory(cat);
+                  this.updateFilteredQuotes();
+                })
+            }, (cat: string) => `${cat}_${this.selectedCategory === cat}`)
+          }
+          .padding({ left: 10, right: 10 })
+        }
+        .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
+        .width('100%')
+
         Blank().height('3%')
+        
         Swiper() {
-          ForEach(DailyQuoteViewModel.instance.getQuoteList(), (item: DailyQuoteModel) => {
+          ForEach(this.filteredQuotes, (item: DailyQuoteModel) => {
             Column() {
               Blank()
               Text(item.bodyText)
-                .fontColor('#ff47392b')
+                .fontColor(this.textColour)
                 .fontStyle(FontStyle.Italic)
                 .textAlign(TextAlign.Start)
+                .fontSize(this.fontSize)
               Text(`- ${item.author}`)
-                .fontColor(Color.Blue)
                 .textAlign(TextAlign.End)
                 .alignSelf(ItemAlign.End)
-                .fontColor('#ff47392b')
+                .fontColor(this.textColour)
                 .fontWeight(900)
+                .fontSize(this.fontSize - 2)
               Blank().height('5%')
               Row() {
                 Blank().width('3%')
@@ -78,14 +160,14 @@ struct QuotePage {
                   Text(this.isFavouriteQuote(item.id) ? 'unfavourite' : 'favourite')
                     .fontSize(11)
                     .fontStyle(FontStyle.Italic)
-                    .fontColor(Color.Black)
+                    .fontColor(this.textColour)
                 }
                 .type(ButtonType.Normal)
-                .backgroundColor('#ffcacaca')
+                .backgroundColor(this.buttonBgColor)
                 .padding(2)
                 .borderRadius(2)
                 .borderWidth(1)
-                .borderColor(Color.Black)
+                .borderColor(this.textColour)
                 .onClick(() => {
                   this.changeQuoteFavourite(item.id);
                 })
@@ -94,41 +176,64 @@ struct QuotePage {
             }
             .alignItems(HorizontalAlign.Center)
             .justifyContent(FlexAlign.Center)
-            .backgroundColor('#ffefc1a1')
+            .backgroundColor(this.cardBgColor)
             .borderRadius(20)
-            .padding(5)
+            .padding(10)
             .margin({
               left: '10%',
               right: '10%'
             })
-          }, (item: DailyQuoteModel) => `${item.id}_${item.isFavourite}`)
+            .height('90%')
+          }, (item: DailyQuoteModel) => `${item.id}_${this.favouriteQuotesIDs.includes(item.id)}_${this.selectedCategory}`)
         }
         .loop(false)
         .height('50%')
         .width('100%')
         .indicator(false)
 
-        Blank().height('1%')
-        Button() {
-          Text('see favorites')
-            .fontSize(11)
-            .fontStyle(FontStyle.Italic)
-            .fontColor('#ff47392b')
-            .decoration({
-              type: TextDecorationType.Underline,
-              color: '#ff47392b',
-              style: TextDecorationStyle.SOLID
-            })
+        Row() {
+          Button() {
+            Text('see favorites')
+              .fontSize(11)
+              .fontStyle(FontStyle.Italic)
+              .fontColor(this.textColour)
+              .decoration({
+                type: TextDecorationType.Underline,
+                color: this.textColour,
+                style: TextDecorationStyle.SOLID
+              })
+          }
+          .onClick(() => {
+            this.pageInfos.pushPathByName('FavouriteQuotesPage', null)
+          })
+          .padding(10)
+          .backgroundColor($r('sys.color.text_button_container_focus_color'))
+
+          Blank().width('5%')
+
+          Button() {
+            Text('settings')
+              .fontSize(11)
+              .fontStyle(FontStyle.Italic)
+              .fontColor(this.textColour)
+              .decoration({
+                type: TextDecorationType.Underline,
+                color: this.textColour,
+                style: TextDecorationStyle.SOLID
+              })
+          }
+          .onClick(() => {
+            this.pageInfos.pushPathByName('SettingsPage', null)
+          })
+          .padding(10)
+          .backgroundColor($r('sys.color.text_button_container_focus_color'))
         }
-        .onClick(() => {
-          this.pageInfos.pushPathByName('FavouriteQuotesPage', null)
-        })
-        .padding(10)
-        .backgroundColor($r('sys.color.text_button_container_focus_color'))
+        .width('90%')
+        .justifyContent(FlexAlign.Center)
       }
       .height('100%')
       .width('100%')
-      .backgroundColor('#fffffbe0')
+      .backgroundColor(this.bgColor)
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
     }
